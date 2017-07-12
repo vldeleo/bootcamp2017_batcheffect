@@ -1,0 +1,60 @@
+---
+title: "BioInformatics Bootcamp"
+author: "Victoria DeLeo"
+date: "July 12, 2017"
+output: html_document
+---
+
+**Goal: to examine batch effect in a study on gene expression across ethnicities.**
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+First, we install and load the libraries needed for this analysis and get the data from ***publication***.
+
+````{r beginningtutorial, message= F}
+library(Biobase)
+library(nasaweather)
+library(rafalib)
+library(dplyr)
+library(ggvis)
+library(devtools)
+library(curl)
+library(genefilter)
+library(GSE5859)
+data(GSE5859)
+
+````
+
+Our data is imported as an ExpressionSet object. This has information about gene expression and samples.
+We separate this information:
+
+
+````{r settingvariables, echo = T}
+geneExpression = exprs(e)
+sampleInfo = pData(e)
+head(sampleInfo$date)
+year = factor( format(sampleInfo$date,"%y") )
+tab = table(year,sampleInfo$ethnicity)
+print(tab)
+````
+
+Now we want to do analysis, so we remove control genes and perform a t-test between ethnicities and then between the years 2002 and 2003.
+
+````{r removecontrolttest, echo = T}
+
+out <- grep("AFFX",rownames(geneExpression))
+eth <- sampleInfo$ethnicity
+ind <- which(eth%in%c("CEU","ASN"))
+res1 <- rowttests(geneExpression[-out,ind],droplevels(eth[ind]))
+ind <- which(year%in%c("02","03") & eth=="CEU")
+res2 <- rowttests(geneExpression[-out,ind],droplevels(year[ind]))
+mypar(2,2)
+hist(res1$p, main="p-value of CEU vs ASN", xlab = "P-values")
+hist(res2$p, main="p-value of 2002 vs 2003 for CEU", xlab = "P-values")
+
+````
+
+As we can see, there is definite right skew of p-value distributions from both year and ethnicity. We can conclude that p-value of expression change is *highly* influenced by the batch effect of year.
+

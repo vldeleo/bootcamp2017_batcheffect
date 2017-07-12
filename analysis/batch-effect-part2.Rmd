@@ -1,0 +1,71 @@
+---
+title: "batch-effect-part2"
+author: "VictoriaDeLeo"
+date: "July 12, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Goal: to edit data and remove a redundant sample, using the same dataset as part 1.
+
+````{r beginningtutorial, message= F}
+library(Biobase)
+library(nasaweather)
+library(rafalib)
+library(dplyr)
+library(ggvis)
+library(devtools)
+library(curl)
+library(genefilter)
+library(GSE5859)
+data(GSE5859)
+
+````
+
+````{r settingvariables, echo = T}
+geneExpression = exprs(e)
+sampleInfo = pData(e)
+head(sampleInfo$date)
+year = factor( format(sampleInfo$date,"%y") )
+tab = table(year,sampleInfo$ethnicity)
+print(tab)
+````
+
+
+````{r doingthedata}
+cors <- cor(exprs(e))
+Pairs=which(abs(cors)>0.9999,arr.ind=TRUE)
+out = Pairs[which(Pairs[,1]<Pairs[,2]),,drop=FALSE]
+if(length(out[,2])>0) e=e[,-out[2]]
+out <- grep("AFFX",featureNames(e))
+e <- e[-out,]
+````
+
+Now, we adapt our data matrix to remove batch effect and look at the relationship between factors.
+
+````{r detrendingdata, include = T}
+y <- exprs(e)-rowMeans(exprs(e))
+dates <- pData(e)$date
+eth <- pData(e)$ethnicity
+s <- svd(y)
+cols = as.numeric(eth)
+mypar()
+plot(s$v[,1],s$v[,2],col=cols,pch=16, xlab="PC1",ylab="PC2")
+legend("bottomleft",levels(eth),col=seq(along=levels(eth)),pch=16)
+title("Ethnic groups")
+cols = as.numeric(year)
+mypar()
+plot(s$v[,1],s$v[,2],col=cols,pch=16, xlab="PC1",ylab="PC2")
+legend("bottomleft",levels(year),col=seq(along=levels(year)),pch=16)
+title("Years")
+
+````
+
+
+We can see that PCA1 is very closely related to both ethnicity and year.
+
+
+
