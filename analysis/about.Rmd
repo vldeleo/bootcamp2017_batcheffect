@@ -5,4 +5,4 @@ output:
     toc: false
 ---
 
-Describe your project.
+We examine the batch effect in an analysis of expression across ethnicities.
