@@ -5,7 +5,11 @@ output:
     toc: false
 ---
 
-This project is pretty much empty.
+### Overview
+This project has two RMarkdown scripts for examining batch effect.
 
-[rmarkdown]: http://rmarkdown.rstudio.com/rmarkdown_websites.htm
-[rstudio]: https://www.rstudio.com/products/rstudio/download/preview/
+### Analysis
+
+Report 1 [link](batch-effect-part1.html)
+Report 2 [link](batch-effect-part2.html)
+Test Report [link](new_analysis.html)
